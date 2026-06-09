@@ -156,3 +156,55 @@ physically exact for the fixed rooftop array. Predicted: rank1+ and 2-GT
 recall up, cardinality confusion shifts right, modest precision cost on
 sparse scenes. E5: azimuth vocab 72 -> 240, single change vs E3. Predicted:
 mAAE 1.9 -> ~1.3, recall@5deg +0.03 to +0.08 from the 5-10 deg band.
+
+## D4: near-field micro-diagnostic (E3 checkpoint)
+
+Recall by range bin across gates (notebooks/results/diag_e3_nearfield.json):
+0-10 m recall roughly DOUBLES from gate 5 to gate 15 on every split
+(e.g. static_easy 0.41 -> 0.68, difficult_together 0.19 -> 0.53) while
+10-20 m saturates near 1.0 by gate 10. Verdict: near-field misses are
+emitted but 5-15 deg off, consistent with the annotation-center vs
+acoustic-centroid mismatch (1 m offset at 5 m is ~11 deg). Partly a label
+geometry effect, not purely model error. Far misses (20-30 m) do NOT recover
+with wider gates: those are true absences (low SNR at range).
+
+## E4: scene-mixing augmentation (single change vs E3)
+
+Run `soundreg_e4_mix`. With prob 0.5 a train sample becomes
+stft_a + g * stft_b (g uniform in -10..0 dB), labels = union reordered by
+gain-adjusted own-scene dominance, capped at MAX_OBJECTS. Best epoch 51,
+early stop 76 (augmentation regularizes: peak comes 4x later than E3).
+
+| split | P | R | F1@5deg | mAAE | F1 vs E3 |
+| --- | --- | --- | --- | --- | --- |
+| static_easy | 0.605 | 0.714 | **0.655** | 1.75 | +0.042 |
+| static_difficult | 0.535 | 0.465 | 0.497 | 1.86 | +0.086 |
+| easy_together | 0.491 | 0.628 | 0.551 | 1.76 | +0.004 |
+| difficult_together | 0.498 | 0.448 | 0.472 | 1.98 | +0.074 |
+
+**Outcome vs prediction.** Confirmed and stronger: recall up everywhere
+(static_easy recall 0.714 now MATCHES the evidential reference), the 0.65
+goal is reached on static_easy. Physically valid superposition works.
+
+## E5: azimuth vocabulary 240 (single change vs E3)
+
+Run `soundreg_e5_az240`. Best epoch 32, early stop 57.
+
+| split | P | R | F1@5deg | mAAE | F1 vs E3 |
+| --- | --- | --- | --- | --- | --- |
+| static_easy | 0.450 | 0.552 | 0.496 | 1.63 | -0.117 |
+| static_difficult | 0.620 | 0.481 | **0.541** | 2.06 | +0.130 |
+| easy_together | 0.473 | 0.543 | 0.505 | 1.78 | -0.042 |
+| difficult_together | 0.595 | 0.464 | **0.521** | 2.11 | +0.123 |
+
+**Outcome vs prediction.** Partially contradicted: predicted a uniform gain
+from finer bins; got a SPLIT pattern: large gains with much higher precision
+on the difficult splits, losses on the easy ones. Possible mechanisms (to be
+separated later if it matters): harder 240-way azimuth task changes what the
+single val-F1 number selects; precision/recall balance shifts toward
+precision. Single-seed caveat applies to all of tonight's runs.
+
+**Decision.** E4 and E5 improve complementary splits; E6 = mixing + az240
+combined, same recipe otherwise. Predicted: at or near best-of-both per
+split; if the easy-split loss of E5 persists under mixing, the az240 change
+is implicated as a real trade-off rather than selection noise.
