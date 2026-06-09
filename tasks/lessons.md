@@ -19,3 +19,16 @@ things simple and short."
 single self-contained notebooks (Settings cell with all knobs first, sections
 Dataset -> Model -> Losses -> Training -> Curves -> Inference -> Evaluation ->
 Result). Structured packages are for `main`, after an idea has earned it.
+
+## 2026-06-10, diagnosis before intervention
+**Correction:** "Just saying this is what we would change up front doesn't do
+justice to our suspicion on what could have caused a particular training to
+fail." A pre-planned campaign of changes is not research.
+**Rule:** Every experiment cycle starts from a SYMPTOM, enumerates competing
+HYPOTHESES for its cause, runs cheap DISCRIMINATING diagnostics (decode-only,
+re-scoring, per-token analyses) before any retraining, then picks the
+intervention implied by the surviving hypothesis, with a stated predicted
+effect. An intervention whose result contradicts its predicted mechanism is a
+failed explanation even if the metric improves. The ledger entry format is:
+Symptom, Hypotheses, Diagnostics, Surviving explanation, Intervention,
+Predicted effect, Outcome.
