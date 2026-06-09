@@ -1,0 +1,8 @@
+# Training-free baseline: SRP-PHAT map + peak picking.
+_base_: base.yaml
+exp_name: srp_peaks
+data:
+  features: [srp]
+model:
+  name: srp_peaks
+  max_peaks: 12

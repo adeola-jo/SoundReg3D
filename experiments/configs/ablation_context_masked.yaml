@@ -1,0 +1,8 @@
+# Conditioning ablation: each object is predicted without seeing previously
+# emitted objects (tokenization held fixed). The cleanest test that
+# conditioning, not tokenization, does the work.
+_base_: base.yaml
+exp_name: ablation_context_masked
+model:
+  decoder:
+    context_mode: object_only

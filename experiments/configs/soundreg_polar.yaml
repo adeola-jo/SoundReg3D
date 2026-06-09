@@ -1,0 +1,12 @@
+# SoundReg with the polar SRP encoder (the brief's canonical design):
+# features live on the target polar grid with circular azimuth convs.
+_base_: base.yaml
+exp_name: soundreg_polar
+data:
+  features: [srp]
+model:
+  encoder:
+    name: polar_srp
+    d_model: 192
+    channels: [64, 128]
+    strides: [2, 2]
