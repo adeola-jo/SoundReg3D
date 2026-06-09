@@ -90,3 +90,35 @@ baseline. E3 (training): retrain identically but select checkpoints by val F1
 (decoded), 120 epochs, since F1 was still climbing at 60. Predicted effect:
 E3 best >= last.pt everywhere; if val F1 plateaus then falls, true detection
 overfitting exists after all and we will see where.
+
+## E3: identical architecture, checkpoint selection by decoded val F1 + early stopping
+
+Run `soundreg_e3`. Single change vs E1/v1: model selection. Per-epoch greedy
+decode of the 280 val scenes, best checkpoint by val F1@5deg, early stop with
+patience 25. Best at epoch 12 (val F1 0.565), stopped at 37. Curves (with the
+val-F1 panel): notebooks/runs/soundreg_e3/curves.png.
+
+| split | gate | P | R | F1 | mAAE | mADE |
+| --- | --- | --- | --- | --- | --- | --- |
+| static_easy | 5deg | 0.581 | 0.648 | **0.613** | 1.98 | |
+| static_easy | 5deg+5m | 0.479 | 0.533 | **0.505** | 1.95 | 1.87 |
+| static_difficult | 5deg | 0.478 | 0.361 | 0.411 | 1.83 | |
+| static_difficult | 5deg+5m | 0.384 | 0.290 | 0.330 | 1.91 | 1.74 |
+| easy_together | 5deg | 0.529 | 0.565 | 0.547 | 1.87 | |
+| easy_together | 5deg+5m | 0.441 | 0.471 | 0.456 | 1.81 | 1.93 |
+| difficult_together | 5deg | 0.465 | 0.348 | 0.398 | 2.02 | |
+| difficult_together | 5deg+5m | 0.369 | 0.276 | 0.316 | 1.99 | 1.72 |
+
+EOS Brier 0.137 (continue 0.140, stop 0.726).
+
+**Outcome vs prediction.** Predicted E3 >= v1-last everywhere: confirmed.
+static_easy now beats the evidential reference on BOTH gates (0.613 vs 0.5515
+and 0.505 vs 0.4706) at one fifth of the v1 training time. mAAE dropped from
+~2.4 to ~1.9 across the board. EOS over-stopping pressure eased (P(EOS) when
+it should continue: 0.22 -> 0.14).
+
+**Scoreboard vs the 0.65 goal (5 deg gate).** static_easy 0.613 (gap 0.04),
+easy_together 0.547 (gap 0.10), static_difficult 0.411 and
+difficult_together 0.398 (gap 0.25). The difficult splits are the
+battleground; D3 (running) stratifies their misses by range, azimuth sector,
+dominance rank, and cardinality to decide the next intervention.
