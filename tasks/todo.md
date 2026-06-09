@@ -45,11 +45,28 @@
 - [x] Real-data smoke (400 train, 2 epochs): pipeline works, CE
       3.79 -> 3.38, val token acc 0.41, predictions still empty
       (undertrained, immediate EOS as expected)
-- [ ] v1 full run (60 epochs, all data) IN FLIGHT: launched 00:16,
-      log at %TEMP%\soundreg_run\full.log, outputs to
-      notebooks/runs/soundreg_v1 and notebooks/results/. Compare to
-      evidential (F1 0.5515 @5deg static_easy, 0.4706 @5deg+5m);
-      read the *_together splits and EOS calibration first
+- [x] v1 full run DONE (60 epochs, ~18 s/epoch, finished 00:36).
+      Baseline (gate 5deg, then 5deg+5m), vs evidential 0.5515 / 0.4706
+      on static_easy:
+
+      split                F1@5deg  F1@5deg+5m  recall@5deg  mAAE   mADE
+      static_easy          0.4624   0.4301      0.410        2.42   1.79
+      static_difficult     0.3262   0.2411      0.251        2.32   1.76
+      easy_together        0.4589   0.4090      0.413        2.30   1.82
+      difficult_together   0.3163   0.2449      0.248        2.33   1.69
+
+      EOS Brier 0.127; P(EOS) 0.22 when should continue, 0.80 when
+      should stop. Reading: precision BEATS evidential (0.53 vs 0.45
+      static_easy), recall is the deficit (0.41 vs 0.71): conservative
+      cardinality / early EOS, as the audit predicted (finding 4).
+      Range error mADE 1.7-1.8 m beats evidential 2.30. Heavy
+      overfitting: best val CE at EPOCH 7 (1.35), climbing to 2.99 by
+      epoch 60 (eval correctly used best.pt from epoch 7): audit
+      finding 5. Both deficits are exactly what v2 targets.
+      Data stats: train 4193 scenes (0 obj: 1035, 1: 2465, 2: 608,
+      3: 75, 4: 10), val 280, tests 139/158/277/235. RTX 3060 laptop,
+      ~18 s/epoch, full run 20 min, 11 GB pickle load ~75 s on 16 GB
+      RAM (tight but no failure).
 - [ ] Implement the v2 fixes in the notebook as Settings-level options
       (attn-pool over T, SRP polar token path, N_THETA=240, MoG
       checkpoint init for the trunk, length-controlled decode report)
