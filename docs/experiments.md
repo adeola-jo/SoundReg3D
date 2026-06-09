@@ -1,5 +1,14 @@
 # SoundReg experiment ledger (exploration branch)
 
+**GOAL (set by Joseph, 2026-06-10): the best single configuration by F1 across
+ALL four test sets, target 0.65 to 0.70 F1 on every split, beating the
+evidential reference (0.5515 @5deg static_easy). Everything is negotiable:
+architecture components (FiLM included), backbone formulation, MAX_OBJECTS,
+training recipe, data augmentation (must respect the rig: fixed rooftop array,
+driving scenario; superposition-based scene mixing is valid, rotations and
+channel permutations are not). Process: diagnose, hypothesize, intervene;
+research literature when the evidence points outside the current design.**
+
 One entry per experiment. Single-change discipline: every run differs from its
 stated control by exactly one thing, so improvements stay attributable.
 Conventions: benchmark matcher, gates 5deg and 5deg+5m; reference rows are
