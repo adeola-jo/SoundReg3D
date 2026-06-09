@@ -6,17 +6,36 @@
 - [x] Rewrite `soundreg/` package documentation in that style (tests 10/10)
 - [x] Study `acoustic-bev-benchmark` (cleanup) notebook workflow
 - [x] Create CLAUDE.md (workflow rules + project-specific rules)
-- [ ] Commit everything and push to `main` (create GitHub repo if no remote)
-- [ ] Create `exploration` branch
-- [ ] Write ONE self-contained end-to-end SoundReg notebook
-      (Settings -> Data -> Model -> Training -> Curves -> Inference ->
-      Evaluation -> Result), modeled on the benchmark notebooks
-- [ ] Smoke-execute the notebook end-to-end before calling it done
-- [ ] Push `exploration`
+- [x] Commit everything and push to `main` (remote existed: adeola-jo/SoundReg3D)
+- [x] Create `exploration` branch
+- [x] Write ONE self-contained end-to-end SoundReg notebook
+      (notebooks/01_soundreg.ipynb): reuses the MoG-slot front end
+      (SpeedFiLM + trunk, faithful to src/evidential network.py), swaps the
+      K-slot head for the causal token decoder, trains on the nn_data
+      pickles, exports benchmark-format pred CSVs, scores with the
+      benchmark matcher (5deg / 5deg+5m gates)
+- [x] Smoke-execute the notebook end-to-end before calling it done
+      (against contract-exact fake pickles; real data lives on the Linux
+      box at /home/joadeola/Datasets/nn_data — the notebook default)
+- [x] Push `exploration`
 
 ## Review
 
-(filled in when the block above completes)
+- Trunk re-implementation checked against network.py source: convs are
+  UNPADDED (F: 84 -> 39 -> 18) and conv4 is LazyConv2d — an agent-produced
+  shape table (42/21) was wrong; always verify against source.
+- STFT channel order confirmed from cut_annotation.py + mic_geometry.yaml:
+  interleaved, mic i -> real 2i, imag 2i+1.
+- Mic XML axes are (x_fwd, y_up, z_lat); horizontal plane for steering is
+  (x, z), matching the Neural-SRP loader's axis swap.
+- nn.TransformerDecoder with norm_first needs an explicit final LayerNorm
+  and 0.02 embedding init, else tied logits start at CE ~ 100.
+
+## Next (on the real data, Linux box)
+
+- [ ] Full run of notebooks/01_soundreg.ipynb; compare to evidential rows
+      (F1 0.5515 @5deg static_easy) — read *_together splits first
+- [ ] ORDERING ablation: dominance vs random vs near_to_far
 
 ## Known findings to carry into exploration
 
