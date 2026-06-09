@@ -31,10 +31,28 @@
 - nn.TransformerDecoder with norm_first needs an explicit final LayerNorm
   and 0.02 embedding init, else tied logits start at CE ~ 100.
 
-## Next (on the real data, Linux box)
+## Current block (2026-06-10)
 
-- [ ] Full run of notebooks/01_soundreg.ipynb; compare to evidential rows
-      (F1 0.5515 @5deg static_easy) — read *_together splits first
+- [x] Audit of the v1 architecture (5 findings; see soundreg_brief.tex
+      Section 8 and its Figs. 2-3)
+- [x] soundreg_brief.tex updated: Section 4 pointer, new Section 8
+      (as built / audit / proposed revision v2), two detailed
+      shape-annotated TikZ figures in the Fig. 1 style; compiles
+      locally (5 pages); Joseph reviews on Overleaf
+- [x] Real data arrived: D:\research-datasets\nn_data (train.pkl 11 GB,
+      val, 4 test splits); contract verified (stft (64,84,19),
+      velocity dict, ann centers, vehicle.car only)
+- [x] Real-data smoke (400 train, 2 epochs): pipeline works, CE
+      3.79 -> 3.38, val token acc 0.41, predictions still empty
+      (undertrained, immediate EOS as expected)
+- [ ] v1 full run (60 epochs, all data) IN FLIGHT: launched 00:16,
+      log at %TEMP%\soundreg_run\full.log, outputs to
+      notebooks/runs/soundreg_v1 and notebooks/results/. Compare to
+      evidential (F1 0.5515 @5deg static_easy, 0.4706 @5deg+5m);
+      read the *_together splits and EOS calibration first
+- [ ] Implement the v2 fixes in the notebook as Settings-level options
+      (attn-pool over T, SRP polar token path, N_THETA=240, MoG
+      checkpoint init for the trunk, length-controlled decode report)
 - [ ] ORDERING ablation: dominance vs random vs near_to_far
 
 ## Known findings to carry into exploration

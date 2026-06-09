@@ -3,5 +3,10 @@ __pycache__/
 *.egg-info/
 runs/
 notebooks/runs/
+notebooks/results/
 .pytest_cache/
 .ipynb_checkpoints/
+*.aux
+*.log
+*.out
+*.synctex.gz
