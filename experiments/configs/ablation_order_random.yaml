@@ -1,6 +1,0 @@
-# Order ablation: random emission order (vs dominance default).
-# Other orderings via --set data.ordering=near_to_far|azimuth|oracle_energy
-_base_: base.yaml
-exp_name: ablation_order_random
-data:
-  ordering: random
