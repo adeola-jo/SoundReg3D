@@ -122,3 +122,37 @@ easy_together 0.547 (gap 0.10), static_difficult 0.411 and
 difficult_together 0.398 (gap 0.25). The difficult splits are the
 battleground; D3 (running) stratifies their misses by range, azimuth sector,
 dominance rank, and cardinality to decide the next intervention.
+
+## D3: error stratification on the E3 checkpoint (no training)
+
+Raw: notebooks/results/diag_e3.json (cardinality confusion, recall by range
+bin / azimuth sector / dominance rank, gates 5 and 10 deg, all splits).
+
+Findings:
+1. The hard one-object cap is GONE with F1-based selection: E3 emits 2 (and
+   occasionally 3) objects; on static_difficult, 13 of 54 two-GT scenes now
+   get two predictions. Still under-emits on most 2-GT scenes.
+2. NEAR-FIELD is the worst range bin everywhere: recall@5deg at 0-10 m is
+   0.41 / 0.16 / 0.30 / 0.19 across the four splits, vs 0.84 / 0.42 / 0.81 /
+   0.46 at 10-20 m. Suspicion: at close range the angular extent of a car is
+   huge (1 m offset at 5 m is ~11 deg), so the annotation center and the
+   acoustic centroid (engine, tires) can disagree by more than the 5 deg
+   gate; micro-diagnostic will check whether near-field misses are emitted
+   but 5-10 deg off (label/physics mismatch) or not emitted at all.
+3. Side sector (60-120 deg off axis) is weakest but carries few GT objects
+   (7-22 per split); traffic is mostly front/rear. Data scarcity is the
+   simpler explanation; no rotation augmentation can fix it (rig physics).
+4. Masked sources still trail: rank1+ recall 0.26-0.29 vs rank0 0.38-0.39 on
+   difficult splits. Conditioning headroom remains.
+5. 0.12-0.16 recall everywhere sits between the 5 and 10 deg gates; with
+   mAAE ~1.9 over 5 deg bins (quantization floor 1.25), finer azimuth
+   vocabulary should convert part of that band.
+
+**Decisions.** E4: scene-mixing augmentation (STFT superposition of two train
+scenes, gain U(-10, 0) dB on the second, union of labels reordered by
+gain-adjusted own-scene dominance, 50% of train samples per epoch). Attacks
+cardinality prior, masked-source exposure, and the difficult splits at once;
+physically exact for the fixed rooftop array. Predicted: rank1+ and 2-GT
+recall up, cardinality confusion shifts right, modest precision cost on
+sparse scenes. E5: azimuth vocab 72 -> 240, single change vs E3. Predicted:
+mAAE 1.9 -> ~1.3, recall@5deg +0.03 to +0.08 from the 5-10 deg band.
