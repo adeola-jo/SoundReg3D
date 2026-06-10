@@ -259,3 +259,34 @@ content-adaptive weights over the 19 frames instead of the mean). E8 = E6
 with mixing gain widened to -20..0 dB (deeper maskers = more low-SNR
 exposure, aimed at the far-range true absences). Then combine winners with
 mixed-val selection (the D-meta fix for the blind selection criterion).
+
+## E7: attention pooling over T (single change vs E6)
+
+Run `soundreg_e7_attnpool`. Content-adaptive softmax weights over the 19
+frames replace the mean. Best epoch 28, stop 53.
+F1@5deg: 0.618 / 0.468 / 0.557 / 0.474 (mean 0.529 vs E6 0.537).
+
+**Outcome vs prediction.** NOT confirmed. Predicted a clear gain from
+preserving per-frame masking structure; got a wash (slightly better
+difficult_together, slightly worse elsewhere, and mAAE worsened ~0.2 deg).
+Honest reading: with 100 ms windows and mostly stationary traffic noise, the
+frames may carry too little differential information for pooling to matter,
+or the single-channel scoring is too weak an attention. The v2 figure's
+fix 1 should be downgraded from "expected win" to "tested, neutral".
+
+## E8: deeper mixing gains, -20..0 dB (single change vs E6)
+
+Run `soundreg_e8_deepmix`. Best epoch 19, stop 44.
+F1@5deg: 0.654 / 0.465 / 0.575 / 0.477 (mean 0.543, statistically tied with
+E4's 0.544; best easy_together so far).
+
+**Outcome vs prediction.** Mild confirmation: difficult_together +0.025 and
+easy_together +0.004 vs E6, static_difficult -0.020. Deeper maskers help the
+together splits slightly; no breakthrough on far/low-SNR absences.
+
+**Standing pattern across E4-E8.** Mixing configs cluster at mean 0.54 with
+recall-heavy operating points; E5 (no mixing, az240) still owns the
+difficult splits via a precision-heavy operating point (P ~0.6). The
+per-object confidence is exported but unused: D6 (running) sweeps a
+confidence threshold tuned on val / mixed-val per the benchmark protocol,
+which should let one config reach both operating points.
