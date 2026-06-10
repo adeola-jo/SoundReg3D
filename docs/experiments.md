@@ -240,3 +240,22 @@ recipe, plus mixed-val selection; deeper mixing gains (-20..0 dB) as a
 follow-up lever for low-SNR exposure. Single-seed caveat noted for close
 calls (E4 vs E6 ranking); the structural gaps (0.15 to goal on difficult)
 exceed plausible seed noise.
+
+## D5: decode arms, FiLM contribution, rank recall on E6 (no training)
+
+Raw: notebooks/results/diag_e6.json.
+
+| question | evidence | verdict |
+| --- | --- | --- |
+| does min-1 decoding still help? | plain vs min1 within 0.01 F1 on every split | obsolete; mixing fixed EOS conservatism at the root |
+| is FiLM contributing? | vel0 arm: -0.047 F1 on easy_together (motion split), ~0 elsewhere (static splits have v=0 anyway) | FiLM stays; replacement hypothesis rejected |
+| did mixing fix masked-source recall? | rank1+ vs rank0 recall: 0.667 vs 0.649 on easy_together (parity); 0.36-0.38 vs 0.43-0.46 on difficult (gap halved vs D3) | yes; the conditioning mechanism demonstrably recovers masked sources |
+
+Cardinality: 2-GT scenes now receive 2 predictions in ~30% of cases
+(was ~0% in v1).
+
+**Decisions.** E7 = E6 + attention pooling over T (the untested v2 fix 1;
+content-adaptive weights over the 19 frames instead of the mean). E8 = E6
+with mixing gain widened to -20..0 dB (deeper maskers = more low-SNR
+exposure, aimed at the far-range true absences). Then combine winners with
+mixed-val selection (the D-meta fix for the blind selection criterion).
