@@ -20,6 +20,72 @@ the committed record. Train data: 4193 scenes (1035 with 0 objects, 2465 with
 
 ---
 
+# MORNING SUMMARY (written 2026-06-10, end of the overnight campaign)
+
+**Where we ended.** Best single configuration: **E4** (v1 architecture +
+val-F1 checkpoint selection + early stopping + scene-mixing augmentation).
+Checkpoint: notebooks/runs/soundreg_e4_mix/best.pt. The notebook now ships
+this recipe as Settings defaults (PATIENCE, MIX_PROB, MIX_GAIN_DB).
+
+F1@5deg per split, all configs (joint-gate numbers in the entries):
+
+| config | st_easy | st_diff | easy_tog | diff_tog | mean |
+| --- | --- | --- | --- | --- | --- |
+| v1 (CE-selected) | 0.462 | 0.326 | 0.459 | 0.316 | 0.391 |
+| E3 selection fix | 0.613 | 0.411 | 0.547 | 0.398 | 0.492 |
+| E5 az240 | 0.496 | **0.541** | 0.505 | **0.521** | 0.516 |
+| E6 mix+az240 | 0.640 | 0.485 | 0.571 | 0.452 | 0.537 |
+| E7 +attn pool | 0.618 | 0.468 | 0.557 | 0.474 | 0.529 |
+| E8 deep mix | 0.654 | 0.465 | **0.575** | 0.477 | 0.543 |
+| **E4 mix** | **0.655** | 0.497 | 0.551 | 0.472 | **0.544** |
+| evidential ref | 0.5515 | | | | |
+
+**Goal status.** SOTA beaten on static_easy at both gates (0.655 vs 0.5515;
+0.533 vs 0.4706 joint, the latter from E6). The 0.65 target is met on
+static_easy only; difficult splits stand at ~0.50-0.54 best.
+
+**What was established tonight (the science, not just the numbers):**
+1. Token CE is a misleading selection signal for this detector (D1): it
+   chose checkpoints 0.14-0.19 F1 below the same run's later epochs.
+2. The masking/conditioning thesis WORKS: after mixing exposure, masked
+   (rank-1+) sources reach recall parity with dominant ones on
+   easy_together (D5). This is the brief's core hypothesis, observed.
+3. Scene mixing (physically exact superposition) is the strongest single
+   lever found: it broke the one-object cardinality cap and lifted recall
+   everywhere (E4/E8).
+4. FiLM earns its place: removing velocity costs 0.047 F1 on the motion
+   split (D5).
+5. Near-field misses are emitted-but-5-to-15-degrees-off (D4): largely an
+   annotation-center vs acoustic-centroid geometry effect; far misses are
+   true low-SNR absences.
+6. Rejected with evidence: CE selection (D1), length-controlled decoding
+   after mixing (D5), attention pooling over T (E7), confidence filtering
+   (D6), mixed-val selection (E9).
+
+**Where the remaining gap to 0.65-everywhere lives.** The difficult splits.
+Their losses decompose into (a) near-field angular offsets that the 5 deg
+gate punishes (label geometry; possibly recoverable by training the model
+to predict annotation centers from acoustic centroids with near-field
+oversampling), (b) far/low-SNR true absences, (c) the E5-style
+precision-heavy operating point that no mixing config reproduced and that
+confidence filtering could not recreate.
+
+**Recommended next steps (in order):**
+1. Seed repeats (2 more seeds) of E4 and E8 to put error bars on the
+   close calls before believing per-split differences under 0.03.
+2. Investigate WHY E5 (az240, no mixing) wins difficult splits with high
+   precision: compare its predictions to E4's on the same scenes
+   (which detections differ?); if it is a real mechanism, a curriculum
+   (train az240 first, add mixing later) may capture both.
+3. Near-field: oversample 0-10 m scenes or weight their loss; check
+   whether the model can learn the centroid-to-center offset.
+4. The SRP polar token path (v2 fix 2) remains untested: highest-value
+   untried architecture change, especially for range (the joint gate).
+5. Range vocabulary and range errors have had no attention at all yet;
+   the joint-gate numbers (mADE ~1.7-1.9 m) suggest headroom.
+
+---
+
 ## E1: v1 baseline (control)
 
 Run `soundreg_v1`, 2026-06-10 00:36. Notebook as committed: reused MoG-slot

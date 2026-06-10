@@ -82,3 +82,13 @@
   too little localization evidence at this scale. The polar SRP encoder
   (features on the target grid) is the next thing to try; the notebook
   should default to it.
+
+
+## Overnight campaign 2026-06-10 (autonomous): DONE
+- Full story: docs/experiments.md (MORNING SUMMARY at top), 11 ledgered
+  steps (D1-D6 diagnostics, E3-E9 trainings), all committed individually.
+- Best config E4 folded into the notebook as Settings defaults
+  (PATIENCE, MIX_PROB, MIX_GAIN_DB); checkpoint at
+  notebooks/runs/soundreg_e4_mix/best.pt; curves.png in every run dir.
+- SOTA beaten on static_easy both gates; 0.65 goal met on static_easy;
+  difficult splits at 0.50-0.54: next steps ranked in the summary.
