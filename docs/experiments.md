@@ -290,3 +290,21 @@ difficult splits via a precision-heavy operating point (P ~0.6). The
 per-object confidence is exported but unused: D6 (running) sweeps a
 confidence threshold tuned on val / mixed-val per the benchmark protocol,
 which should let one config reach both operating points.
+
+## D6: confidence-threshold sweep (no training): NEGATIVE
+
+Thresholds tuned on val and on a mixed copy of val, applied to test
+(notebooks/results/diag_confsweep.json). Effect on E6: mean F1 0.537 ->
+0.540. On E8: the plain-tuned threshold HURTS (0.543 -> 0.533); the
+mix-tuned sweep selects no threshold at all. Verdict: the per-object
+confidence (mean token probability) is not informative enough to trade
+recall for precision; E5's difficult-split advantage lies in WHICH
+detections it makes, not in a filterable low-confidence subset.
+
+## E9: mixed-val checkpoint selection: NEGATIVE
+
+Run `soundreg_e9_mixsel` (E8 recipe, selection = mean of plain-val and
+mixed-val F1). Mean F1 0.496, worse on every split than E8. Verdict:
+synthetic mixtures are a poor proxy for the difficult splits; their
+difficulty comes from hard positions and low SNR, not from object count.
+Plain val-F1 selection stays.
