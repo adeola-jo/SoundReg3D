@@ -1,0 +1,7 @@
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+PyYAML>=6.0
+soundfile>=0.12      # only needed by data_adapter for audio export
+# torch is OPTIONAL: install the CUDA build on your GPU box to accelerate
+# the SRP grid scan (detector.py auto-detects). CPU works, just slower.

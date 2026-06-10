@@ -1,0 +1,46 @@
+# config.yaml — single source of truth for the premise study.
+# Decision thresholds (P1–P5) are FROZEN after the first full run; if you must
+# change one, do it in a commit BEFORE running and say why in the message.
+
+mic_xml: data/mic_geometry.xml       # TODO(JOSEPH): real path in your workspace
+workdir: premise_out
+fs: 16000
+
+stft: { n_fft: 512, hop: 256, fmin: 50.0, fmax: 4000.0 }
+
+grid:                                # matches the model's target vocabulary
+  n_theta: 72                        # 5 deg bins (v1); CRB plot also shows 240
+  n_r: 20
+  r_min: 2.0
+  r_max: 50.0
+  log_range: true
+
+detector:
+  thresh_rel: 0.35                   # tuned ONCE on the tuning split, then frozen
+  gate_deg: 5.0                      # benchmark matcher gates
+  gate_m: 5.0
+
+sets:
+  a_scenes: 10000
+  b_per_cell: 50
+  b3_scenes: 500
+  tuning_split: 500                  # excluded from all reported numbers
+
+glimpse: { beta: 1.0, hidden_below: 0.20 }
+
+adapter: { max_clips: 400, max_noise: 200, min_clips_warn: 80 }
+
+decision:                            # pre-registered rules (PROTOCOL.md §4)
+  P1_hidden_fraction_pass: 0.25
+  P1_hidden_fraction_fail: 0.10
+  P2a_sic_gain_pts_pass: 15.0
+  P2a_sic_gain_pts_fail: 5.0
+  P2b_null_recovers_frac: 0.80
+  P3_order_gain_pts_pass: 5.0
+  P3_order_gain_pts_fail: 2.0
+  P4_rmax_m_pass: 20.0
+  P4_rmax_m_fail: 10.0
+  P4_rel_err: 0.25
+  P4_snr_db: 10.0
+  P5_ego_glimpse_floor: 0.15
+  P5_speed_kmh: 30.0
