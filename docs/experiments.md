@@ -208,3 +208,35 @@ precision. Single-seed caveat applies to all of tonight's runs.
 combined, same recipe otherwise. Predicted: at or near best-of-both per
 split; if the easy-split loss of E5 persists under mixing, the az240 change
 is implicated as a real trade-off rather than selection noise.
+
+## E6: mixing + az240 combined
+
+Run `soundreg_e6_mix_az240`. Best epoch 25, early stop 50.
+
+| split | P | R | F1@5deg | F1@5deg+5m | vs best single |
+| --- | --- | --- | --- | --- | --- |
+| static_easy | 0.600 | 0.686 | 0.640 | **0.533** | E4 0.655 |
+| static_difficult | 0.544 | 0.437 | 0.485 | 0.388 | E5 0.541 |
+| easy_together | 0.509 | 0.650 | **0.571** | 0.488 | E4 0.551 |
+| difficult_together | 0.500 | 0.412 | 0.452 | 0.355 | E5 0.521 |
+
+Cross-config scoreboard @5deg (mean): E3 0.492, E5 0.516, E6 0.537,
+E4 0.544. At the joint gate E6's static_easy 0.533 is the best so far
+(reference 0.4706).
+
+**Outcome vs prediction.** Partial composition only: E6 wins easy_together,
+holds near E4 on static_easy, but loses E5's difficult-split gains.
+
+**Meta-finding (important).** E4, E5, E6 all peak at val F1 ~0.545 yet
+differ by up to 0.09 F1 per test split: the single val-F1 selection signal is
+blind to the difficult-split axis of the goal. The selection criterion needs
+to represent difficult conditions (candidate: also decode a MIXED version of
+val and select on the mean), otherwise every future run is selected for easy
+performance.
+
+**Decisions.** D5 (running): FiLM contribution, min-1 decode, rank recall on
+E6. Next training: attention pooling over T (v2 fix 1, untested) on the E6
+recipe, plus mixed-val selection; deeper mixing gains (-20..0 dB) as a
+follow-up lever for low-SNR exposure. Single-seed caveat noted for close
+calls (E4 vs E6 ranking); the structural gaps (0.15 to goal on difficult)
+exceed plausible seed noise.
